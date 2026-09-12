@@ -1,0 +1,111 @@
+# =============================================================================
+# electron-builder.yml — packaging for FinCraftly for Windows
+# -----------------------------------------------------------------------------
+# `npm run dist` produces a branded NSIS installer in release/:
+#   FinCraftly-Setup-<version>.exe
+# The installer draws its own three screens (build/installer.nsh + build/art):
+# Welcome → Installing → Done, per-user, adds Start-menu + desktop shortcuts and
+# offers to launch the app. Uninstall is registered in Windows Settings.
+# =============================================================================
+
+appId: com.fincraftly.desktop
+productName: FinCraftly
+copyright: Copyright © 2026 FinCraftly
+executableName: FinCraftly
+
+directories:
+  output: release
+  buildResources: build
+
+# Only the compiled app tree, the shell assets and the runtime deps are packed.
+files:
+  - dist/**/*
+  - package.json
+  - "!**/*.map"
+  - "!**/*.ts"
+
+asar: true
+compression: maximum
+
+# ── Windows ──────────────────────────────────────────────────────────────────
+win:
+  target:
+    - target: nsis
+      arch: [x64]
+  icon: build/icon.ico
+  artifactName: FinCraftly-Setup-${version}.${ext}
+  # ── CODE SIGNING (security audit finding #4, 2026-09-06) ───────────────────
+  # Builds are currently UNSIGNED. That matters more than the SmartScreen prompt:
+  # the auto-updater downloads and installs from https://fincraftly.com/desktop/
+  # updates — the same host as the web app — and electron-updater's SHA-512 check
+  # is read from latest.yml on that same host. So a compromise of the web host is
+  # remote code execution on every customer machine, with no independent check to
+  # stop it. A publisher signature is that independent check: Windows verifies it
+  # regardless of where the bytes came from.
+  #
+  # To sign, set ONE of these in the release pipeline (never in the repo):
+  #   • OV/EV certificate:  WIN_CSC_LINK (base64 .pfx or a path) + WIN_CSC_KEY_PASSWORD
+  #   • Azure Trusted Signing: an `azureSignOptions:` block here + the Azure creds
+  # Then UNCOMMENT publisherName below so electron-updater refuses any installer
+  # not published under that exact name. Its value must match the certificate's
+  # subject CN EXACTLY, so it stays commented until the certificate exists —
+  # a wrong value would block every legitimate update.
+  #
+  # publisherName:
+  #   - FinCraftly   # ← must equal the certificate subject CN
+  signAndEditExecutable: true
+  # Verify the publisher signature of a downloaded update before installing it.
+  # This is the default, set explicitly so it cannot be lost in a refactor. It is
+  # a no-op while builds are unsigned and engages the moment they are signed.
+  verifyUpdateCodeSignature: true
+
+nsis:
+  oneClick: false
+  perMachine: false
+  # Three screens (Welcome → Installing → Done), per-user, no folder picker and
+  # no elevation — the theme and copy live in build/installer.nsh.
+  allowToChangeInstallationDirectory: false
+  allowElevation: false
+  include: build/installer.nsh
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  runAfterFinish: true
+  deleteAppDataOnUninstall: false
+  shortcutName: FinCraftly
+  uninstallDisplayName: FinCraftly
+  installerIcon: build/icon.ico
+  uninstallerIcon: build/icon.ico
+  # Only the uninstaller still uses MUI's sidebar; the installer draws its own
+  # screens from build/art/*.bmp (see build/installer.nsh, build/installer-art.py).
+  installerSidebar: build/installerSidebar.bmp
+  uninstallerSidebar: build/uninstallerSidebar.bmp
+  artifactName: FinCraftly-Setup-${version}.${ext}
+
+# ── Deep links (fincraftly://settings etc.) ─────────────────────────────────
+protocols:
+  - name: FinCraftly
+    schemes: [fincraftly]
+
+# ── Auto-update feed ─────────────────────────────────────────────────────────
+# A static host that serves the files electron-builder writes to release/
+# (latest.yml + the installer + .blockmap). Upload every `npm run dist` output
+# there and installed apps update themselves silently. Until the URL serves a
+# latest.yml the app just logs "update check failed" and carries on.
+#
+# ── SECURITY (audit finding #4, 2026-09-06) ─────────────────────────────────
+# This URL is on the SAME host as the live web app, and clients auto-download and
+# auto-install from it. Two things follow, both tracked in SECURITY_RUNBOOK.md:
+#
+#   1. MOVE IT. Updates should be served from a dedicated origin/bucket whose
+#      write access is a separate, minimal-privilege release credential — not the
+#      same host and credentials as the running web app. Change this URL only
+#      once that origin actually serves latest.yml, or every client stops
+#      updating. Point it at the new origin, publish there first, then cut over.
+#   2. SIGN IT. Until the move (and after it), `scripts/sign-release.mjs`
+#      produces latest.yml.sig, a detached Ed25519 signature the app verifies
+#      against a key it carries — so owning the host is not enough to ship code.
+#      Upload latest.yml.sig with every release.
+publish:
+  provider: generic
+  url: https://fincraftly.com/desktop/updates
+  publishAutoUpdate: true

@@ -1,0 +1,40 @@
+/* menubutton.css — the ⋯ button that sits beside the Windows caption buttons.
+   The whole view is the button; its background is the page background so it
+   reads as part of the platform's topbar, not as a control on top of it. */
+
+/* Never part of the window's drag region: the OS must not swallow the click. */
+html, body, .menu-button {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+}
+
+html, body {
+  background: var(--bg);
+}
+
+.menu-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  color: var(--muted);
+  transition: background-color 80ms ease, color 80ms ease;
+}
+
+.menu-button:hover {
+  background: var(--hover);
+  color: var(--text);
+}
+
+.menu-button:active,
+.menu-button[aria-expanded="true"] {
+  background: var(--active);
+  color: var(--text);
+}
+
+.menu-button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: -3px;
+  border-radius: 0;
+}

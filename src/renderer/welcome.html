@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self'; script-src 'self'; img-src 'self' data:;" />
+  <title>FinCraftly</title>
+  <link rel="stylesheet" href="shell.css" />
+  <link rel="stylesheet" href="welcome.css" />
+</head>
+<body>
+  <main class="welcome" id="welcome" data-phase="idle">
+    <div class="glow" aria-hidden="true"></div>
+
+    <section class="card">
+      <img class="mark" src="assets/mark.png" alt="" width="72" height="72" draggable="false" />
+      <div class="wordmark">FinCraftly</div>
+
+      <div class="phase phase-idle">
+        <h1>Your AI workforce, on your desktop.</h1>
+        <p>Sign in through your browser to continue.</p>
+        <button class="primary" id="sign-in" type="button">
+          <span id="sign-in-icon"></span><span>Sign in with browser</span>
+        </button>
+      </div>
+
+      <div class="phase phase-waiting">
+        <h1>Waiting for your browser…</h1>
+        <p>Finish signing in on fincraftly.com.</p>
+        <div class="spinner" aria-hidden="true"></div>
+        <button class="primary" id="reopen" type="button">Open browser again</button>
+        <button class="link" id="cancel" type="button">Cancel</button>
+      </div>
+
+      <div class="phase phase-completing">
+        <h1>Signing you in…</h1>
+        <p>One moment.</p>
+        <div class="spinner" aria-hidden="true"></div>
+      </div>
+
+      <div class="phase phase-error">
+        <h1>That didn't go through</h1>
+        <p id="error"></p>
+        <button class="primary" id="retry" type="button">
+          <span id="retry-icon"></span><span>Try again</span>
+        </button>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <span id="version"></span>
+    </footer>
+  </main>
+
+  <script src="shellIcons.js"></script>
+  <script src="welcome.js"></script>
+</body>
+</html>

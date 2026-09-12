@@ -1,0 +1,23 @@
+/* offline.css — styles for offline.html */
+
+html, body { overflow: auto; }
+body { -webkit-app-region: drag; app-region: drag; }
+.retry {
+  -webkit-app-region: no-drag;
+  app-region: no-drag;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 34px;
+  padding: 0 14px;
+  border-radius: 8px;
+  border: 1px solid var(--pill-border);
+  background: var(--pill);
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background-color 90ms ease, border-color 90ms ease;
+}
+.retry:hover { background: var(--pill-hover); border-color: var(--pill-border-hover); }
+.retry[disabled] { opacity: 0.6; pointer-events: none; }

@@ -1,0 +1,42 @@
+{
+  "name": "fincraftly-desktop",
+  "productName": "FinCraftly",
+  "version": "1.2.4",
+  "description": "FinCraftly for Windows \u2014 the AI Workspace as a native desktop app.",
+  "author": {
+    "name": "FinCraftly",
+    "email": "support@fincraftly.com"
+  },
+  "homepage": "https://fincraftly.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fincraftly/fincraftly-desktop.git"
+  },
+  "license": "UNLICENSED",
+  "private": true,
+  "main": "dist/main/main.js",
+  "scripts": {
+    "clean": "node scripts/clean.mjs",
+    "build": "npm run clean && tsc -p tsconfig.json && node scripts/copy-static.mjs",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "start": "npm run build && electron .",
+    "dev": "npm run build && cross-env FINCRAFTLY_DEV=1 electron .",
+    "dev:local": "npm run build && cross-env FINCRAFTLY_DEV=1 FINCRAFTLY_ORIGIN=http://localhost:3000 electron .",
+    "dist": "npm run build && electron-builder --win --x64 --publish never",
+    "dist:dir": "npm run build && electron-builder --win --x64 --dir --publish never",
+    "postinstall": "electron-builder install-app-deps",
+    "sign-release": "node scripts/sign-release.mjs",
+    "generate-release-keys": "node scripts/sign-release.mjs --generate-keys"
+  },
+  "devDependencies": {
+    "@types/node": "^22.10.0",
+    "cross-env": "^7.0.3",
+    "electron": "^44.2.0",
+    "electron-builder": "^26.15.3",
+    "typescript": "^5.7.0"
+  },
+  "dependencies": {
+    "electron-log": "^5.4.4",
+    "electron-updater": "^6.8.9"
+  }
+}
