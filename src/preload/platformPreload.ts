@@ -7,13 +7,14 @@
 // preload cannot `require` local modules; the two channel names below are
 // mirrored in src/shared/config.ts → IPC.platformTheme / IPC.platformReady).
 //
-// It has exactly two jobs:
+// Its jobs:
 //   1. tell the shell which theme the platform is in, so the titlebar and the
 //      Windows caption buttons repaint in step with `<html data-theme>`;
-//   2. expose a tiny, read-only `window.fincraftlyDesktop` marker so the
-//      platform can detect the desktop app in future without knowing Electron.
+//   2. expose `window.fincraftlyDesktop`: a marker so the platform can detect
+//      the app, and the FinCodes requests Local Work uses on this computer.
 //
-// It deliberately exposes NO way for page scripts to reach Node or IPC.
+// It exposes NO way for page scripts to reach Node, and exactly three IPC
+// requests (window.fincraftlyDesktop.fincodes) that the main process vets.
 // =============================================================================
 
 import { contextBridge, ipcRenderer } from "electron";
@@ -76,9 +77,20 @@ if (document.documentElement) {
   document.addEventListener("DOMContentLoaded", watchTheme, { once: true });
 }
 
+// FinCodes on this computer (mirrors src/main/fincodes/bridge.ts → FINCODES_IPC). Each call is a
+// request the MAIN process decides on: it checks the caller is the platform page, and every call
+// that changes anything ends in a native step the person takes (the consent page, the folder
+// picker, a confirmation). The page never passes a path, a command or a key.
+const fincodes = Object.freeze({
+  status: () => ipcRenderer.invoke("fincodes:status"),
+  connect: (options?: { force?: boolean }) => ipcRenderer.invoke("fincodes:connect", { force: options?.force === true }),
+  connectFolder: (options?: { profile?: string }) => ipcRenderer.invoke("fincodes:connect-folder", { profile: typeof options?.profile === "string" ? options.profile.slice(0, 20) : "guarded" }),
+});
+
 contextBridge.exposeInMainWorld("fincraftlyDesktop", {
   version: process.argv.find((arg) => arg.startsWith("--fincraftly-version="))?.slice("--fincraftly-version=".length) ?? "",
   platform: "windows",
+  fincodes,
 });
 
 ipcRenderer.send(CHANNEL_READY);

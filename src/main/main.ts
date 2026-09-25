@@ -6,11 +6,15 @@
 // app lifecycle. Everything window-shaped lives in shellWindow.ts.
 // =============================================================================
 
-import { app, Menu } from "electron";
+import { app, Menu, Notification } from "electron";
 import log from "electron-log/main";
 import { browserLikeUserAgent } from "./platformSession";
 import { ShellWindow } from "./shellWindow";
 import { startAutoUpdates } from "./updater";
+import { registerFinCodesBridge } from "./fincodes/bridge";
+import { finCodes } from "./fincodes/host";
+import { FinCodesTray } from "./fincodes/tray";
+import { ensureTerminalCommand } from "./fincodes/terminal";
 
 const PROTOCOL = "fincraftly";
 
@@ -28,6 +32,10 @@ if (!app.requestSingleInstanceLock()) {
 }
 
 let shellWindow: ShellWindow | null = null;
+let tray: FinCodesTray | null = null;
+/** True once the person chose Quit (tray) — closing the window then really exits. */
+let quitting = false;
+let toldAboutTray = false;
 
 function deepLinkFromArgv(argv: string[]): string | null {
   return argv.find((arg) => arg.toLowerCase().startsWith(`${PROTOCOL}://`)) ?? null;
@@ -64,10 +72,70 @@ function bootstrap(): void {
     const link = deepLinkFromArgv(process.argv);
     if (link) shellWindow.openDeepLink(link);
     startAutoUpdates();
+    startFinCodes();
   }).catch((error) => {
     log.error("startup failed", error);
     app.quit();
   });
 
   app.on("window-all-closed", () => app.quit());
+  app.on("before-quit", () => { quitting = true; });
+}
+
+/**
+ * FinCodes — AI employees coding on this computer. The app ships the program,
+ * starts it, answers Local Work's three requests (bridge.ts) and keeps a tray
+ * icon. Once this computer is connected, closing the window hides it to the
+ * tray and the app starts with Windows, so jobs started from the phone or the
+ * web still reach this computer.
+ */
+function startFinCodes(): void {
+  const window = shellWindow;
+  if (!window) return;
+  if (!finCodes.available()) { log.warn("fincodes: not bundled in this build"); return; }
+
+  void ensureTerminalCommand();
+  registerFinCodesBridge({
+    platformContents: () => window.platformContents(),
+    window: () => window.window,
+    focus: () => window.focus(),
+    changed: () => { void tray?.refresh(); void syncStartWithWindows(); },
+  });
+
+  if (process.env.FINCRAFTLY_SMOKE_FINCODES === "1" && !app.isPackaged) {
+    void import("./fincodesSmoke").then(({ runFinCodesSmoke }) => runFinCodesSmoke(window.platformContents()));
+  }
+
+  void finCodes.ensureRunning().then((running) => {
+    if (!running) return;
+    tray = new FinCodesTray({
+      show: () => window.focus(),
+      openPath: (path) => window.openPlatformPath(path),
+      quit: () => { quitting = true; app.quit(); },
+    });
+    void syncStartWithWindows();
+  });
+
+  window.window.on("close", (event) => {
+    if (quitting || !tray?.connected) return;
+    event.preventDefault();
+    window.window.hide();
+    if (!toldAboutTray && Notification.isSupported()) {
+      toldAboutTray = true;
+      new Notification({ title: "FinCraftly is still running", body: "Your AI employees can keep working on this computer. Quit from the tray icon." }).show();
+    }
+    void syncStartWithWindows();
+  });
+}
+
+/** Start with Windows (to the tray) while this computer is connected to FinCodes; not otherwise. */
+async function syncStartWithWindows(): Promise<void> {
+  if (!app.isPackaged || process.platform !== "win32") return;
+  const status = await finCodes.status().catch(() => null);
+  const wanted = !!status?.paired;
+  const current = app.getLoginItemSettings({ args: ["--hidden"] }).openAtLogin;
+  if (wanted !== current) {
+    app.setLoginItemSettings({ openAtLogin: wanted, args: ["--hidden"] });
+    log.info(`start with Windows: ${wanted ? "on" : "off"}`);
+  }
 }

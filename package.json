@@ -1,8 +1,8 @@
 {
   "name": "fincraftly-desktop",
   "productName": "FinCraftly",
-  "version": "1.2.4",
-  "description": "FinCraftly for Windows \u2014 the AI Workspace as a native desktop app.",
+  "version": "1.3.0",
+  "description": "FinCraftly for Windows \u2014 the AI Workspace as a native desktop app, with FinCodes: AI employees coding on this computer.",
   "author": {
     "name": "FinCraftly",
     "email": "support@fincraftly.com"
@@ -22,11 +22,12 @@
     "start": "npm run build && electron .",
     "dev": "npm run build && cross-env FINCRAFTLY_DEV=1 electron .",
     "dev:local": "npm run build && cross-env FINCRAFTLY_DEV=1 FINCRAFTLY_ORIGIN=http://localhost:3000 electron .",
-    "dist": "npm run build && electron-builder --win --x64 --publish never",
-    "dist:dir": "npm run build && electron-builder --win --x64 --dir --publish never",
+    "dist": "npm run vendor:fincodes && npm run build && electron-builder --win --x64 --publish never",
+    "dist:dir": "npm run vendor:fincodes && npm run build && electron-builder --win --x64 --dir --publish never",
     "postinstall": "electron-builder install-app-deps",
     "sign-release": "node scripts/sign-release.mjs",
-    "generate-release-keys": "node scripts/sign-release.mjs --generate-keys"
+    "generate-release-keys": "node scripts/sign-release.mjs --generate-keys",
+    "vendor:fincodes": "node scripts/vendor-fincodes.mjs"
   },
   "devDependencies": {
     "@types/node": "^22.10.0",

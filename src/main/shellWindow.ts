@@ -82,6 +82,8 @@ import {
 } from "./windowState";
 
 const IS_DEV = process.env.FINCRAFTLY_DEV === "1";
+/** Launched by Windows at log on to keep FinCodes company in the tray: no window until asked for. */
+const START_HIDDEN = process.argv.includes("--hidden");
 
 /** Host + path of a URL for the log — never its query string (tickets, tokens). */
 function safeHost(url: string): string {
@@ -308,8 +310,9 @@ export class ShellWindow {
     win.on("closed", () => { this.destroyed = true; this.clearTicketTimer(); });
 
     // Show only once the shell has something painted, so there is no white flash.
+    // Started by Windows at log on (--hidden): stay in the tray until the person opens it.
     this.welcome.webContents.once("did-finish-load", () => {
-      if (!this.destroyed && !win.isVisible()) win.show();
+      if (!this.destroyed && !win.isVisible() && !START_HIDDEN) win.show();
     });
   }
 
@@ -771,6 +774,23 @@ export class ShellWindow {
   // ───────────────────────────────────────────────────────────────────────────
   // Public helpers used by main.ts
   // ───────────────────────────────────────────────────────────────────────────
+
+  /** The platform view's webContents — the only page the FinCodes bridge answers. */
+  platformContents(): WebContents {
+    return this.platform.webContents;
+  }
+
+  /** Opens a path on the platform (tray / notification targets), e.g. /platform/LocalWork?job=… */
+  openPlatformPath(path: string): void {
+    if (!path.startsWith("/") || path.startsWith("//")) return;
+    this.focus();
+    if (this.welcomeShown) return;
+    this.navigateTo(`${platformOrigin()}${path}`);
+  }
+
+  get isDestroyed(): boolean {
+    return this.destroyed;
+  }
 
   focus(): void {
     if (this.destroyed) return;

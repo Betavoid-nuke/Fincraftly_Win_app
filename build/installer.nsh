@@ -93,6 +93,19 @@ InstallColors ${FC_TEXT} ${FC_BG}
   SetAutoClose true
 !macroend
 
+; Uninstall: take the `fincodes` terminal command's folder back off the user's
+; Path (the app added it — src/main/fincodes/terminal.ts). The FinCodes data in
+; %USERPROFILE%\.fincodes and every project folder are left alone: disconnect a
+; computer from Local Work (or `fincodes uninstall`) to remove those.
+!macro customUnInstall
+  ; resources\fincodes\bin\remove-path.ps1 (written by scripts/vendor-fincodes.mjs) takes that
+  ; folder back off the user's Path, keeping Path expandable. customUnInstall runs BEFORE the
+  ; uninstaller removes the files, so the script is still there.
+  IfFileExists "$INSTDIR\resources\fincodes\bin\remove-path.ps1" 0 +3
+    nsExec::Exec 'powershell.exe -NoProfile -NonInteractive -ExecutionPolicy Bypass -File "$INSTDIR\resources\fincodes\bin\remove-path.ps1"'
+    Pop $0
+!macroend
+
 ; Done: our own page instead of MUI's finish page. StartApp lives here (not at
 ; top level) because it calls the StdUtils plugin, which electron-builder only
 ; registers after this file has been included.

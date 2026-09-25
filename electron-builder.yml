@@ -27,6 +27,14 @@ files:
 asar: true
 compression: maximum
 
+# FinCodes (AI employees coding on this computer): the program runs with the app's
+# own executable as Node, so it ships OUTSIDE the asar — see src/main/fincodes/host.ts
+# and scripts/vendor-fincodes.mjs (run before a build; vendor/ is not committed).
+extraResources:
+  - from: vendor/fincodes
+    to: fincodes
+    filter: ["**/*"]
+
 # ── Windows ──────────────────────────────────────────────────────────────────
 win:
   target:

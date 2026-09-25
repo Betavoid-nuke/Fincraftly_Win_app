@@ -17,3 +17,11 @@ for (const [from, to] of copies) {
     filter: (source) => !source.endsWith(".ts"),
   });
 }
+
+// The FinCodes bundle hash goes INSIDE the app (dist → asar); the bundle itself ships outside it.
+import { copyFileSync, existsSync } from "node:fs";
+const bundleHash = resolve(root, "vendor/fincodes/SHA256");
+if (existsSync(bundleHash)) {
+  mkdirSync(resolve(root, "dist/main/fincodes"), { recursive: true });
+  copyFileSync(bundleHash, resolve(root, "dist/main/fincodes/bundle.sha256"));
+}
