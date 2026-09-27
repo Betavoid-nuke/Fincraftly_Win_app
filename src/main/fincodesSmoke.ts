@@ -34,7 +34,7 @@ export async function runFinCodesSmoke(page: WebContents): Promise<void> {
     // The fake platform's session cookies (scripts/fake-platform.mjs), so /dashboard renders.
     for (const name of ["fc_session", "fc_handshake"]) await getPlatformSession().cookies.set({ url: platformOrigin(), name, value: "1" }).catch(() => undefined);
     const ask = "window.fincraftlyDesktop && window.fincraftlyDesktop.fincodes ? window.fincraftlyDesktop.fincodes.status() : 'no bridge'";
-    await load(page, `${platformOrigin()}/dashboard/user_2test/LocalWork`);
+    await load(page, `${platformOrigin()}/dashboard/user_2test/AIWS`);
     await wait(1_500);
     log.info(`SMOKE-FC page at ${page.getURL()}`);
     const fromApp = await run(page, ask).catch((error: Error) => ({ error: error.message }));

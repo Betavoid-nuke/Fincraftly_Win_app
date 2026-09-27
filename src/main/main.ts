@@ -84,7 +84,7 @@ function bootstrap(): void {
 
 /**
  * FinCodes — AI employees coding on this computer. The app ships the program,
- * starts it, answers Local Work's three requests (bridge.ts) and keeps a tray
+ * starts it, answers the department page's three requests (bridge.ts) and keeps a tray
  * icon. Once this computer is connected, closing the window hides it to the
  * tray and the app starts with Windows, so jobs started from the phone or the
  * web still reach this computer.

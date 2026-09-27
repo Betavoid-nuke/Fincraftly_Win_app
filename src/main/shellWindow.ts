@@ -780,7 +780,7 @@ export class ShellWindow {
     return this.platform.webContents;
   }
 
-  /** Opens a path on the platform (tray / notification targets), e.g. /platform/LocalWork?job=… */
+  /** Opens a path on the platform (tray / notification targets), e.g. /platform/AIWS?job=… */
   openPlatformPath(path: string): void {
     if (!path.startsWith("/") || path.startsWith("//")) return;
     this.focus();

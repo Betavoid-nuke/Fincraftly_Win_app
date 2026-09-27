@@ -1,12 +1,15 @@
 // =============================================================================
 // src/main/fincodes/bridge.ts
 // -----------------------------------------------------------------------------
-// What the platform page (Local Work, in this app only) may ask of FinCodes on
-// this computer. Three requests, each ending in a HUMAN act on the computer:
+// What the platform page (a department's page, in this app only) may ask of
+// FinCodes on this computer. Three requests:
 //
 //   fincodes:status          read-only: is FinCodes here, is it connected, which folders
-//   fincodes:connect         pair this computer — the person approves on the consent page
-//                            (the same page `fincodes login` opens), in a window over the app
+//   fincodes:connect         pair this computer. SILENT (Jay, 2026-09-27): the consent page
+//                            is loaded in a HIDDEN window in the app's own signed-in session
+//                            with a header only this process can add, and approves itself.
+//                            The person never sees a "connect this computer" step — attaching
+//                            a folder is the act. The window is shown only if something fails.
 //   fincodes:connect-folder  the person picks a folder in the Windows folder picker; risky
 //                            folders and any profile above Guarded need a second, native "yes"
 //
@@ -60,7 +63,7 @@ export interface BridgeHost {
 let busy = false;
 
 /**
- * Only the signed-in platform (the /dashboard/… app, where Local Work lives), in the platform
+ * Only the signed-in platform (the /dashboard/… app, where a department’s page lives), in the platform
  * view's main frame. Not marketing pages, not shared artifacts, not a subframe.
  */
 function trusted(event: IpcMainInvokeEvent, host: BridgeHost): boolean {
@@ -68,6 +71,13 @@ function trusted(event: IpcMainInvokeEvent, host: BridgeHost): boolean {
   if (event.sender !== host.platformContents() || event.senderFrame !== event.sender.mainFrame || !isPlatformUrl(frameUrl)) return false;
   try { return /^\/dashboard\/[^/]+\/[^/]+/.test(new URL(frameUrl).pathname); } catch { return false; }
 }
+
+/**
+ * The header that lets the consent page approve itself. Added by THIS process to
+ * ONE request it builds itself; a page in a browser cannot set it, so a link with
+ * `auto=1` typed anywhere else still shows the ordinary Connect button.
+ */
+const DESKTOP_PAIR_HEADER = "x-fincraftly-desktop-pair";
 
 /** The consent window may show the platform and the platform's own Clerk frontend (session handshake) — nothing else. */
 function consentMayShow(url: string): boolean {
@@ -135,11 +145,14 @@ async function connect(host: BridgeHost, force: boolean): Promise<{ ok: boolean;
   const code = String(begun.userCode || "");
   if (!/^[A-Z0-9]{4}-[A-Z0-9]{4}$/.test(code)) return { ok: false, reason: "FinCodes did not return a pairing code." };
   // The consent URL is built HERE from the app's own origin — a URL from anywhere else is never loaded.
-  const consentUrl = `${platformOrigin()}/fincodes/connect?code=${encodeURIComponent(code)}`;
+  // `auto=1` + the desktop header: the page submits its own Connect button for the org the app is
+  // signed into, so pairing happens behind the folder picker instead of in front of it.
+  const consentUrl = `${platformOrigin()}/fincodes/connect?code=${encodeURIComponent(code)}&auto=1`;
 
   const consent = new BrowserWindow({
     parent: host.window(),
     modal: true,
+    show: false,
     width: 520,
     height: 720,
     resizable: false,
@@ -156,6 +169,11 @@ async function connect(host: BridgeHost, force: boolean): Promise<{ ok: boolean;
       devTools: false,
     },
   });
+  // Shown only when the silent path cannot finish — a sign-in that lapsed, a
+  // plan limit, a page that needs the person to pick a workspace.
+  let shown = false;
+  const reveal = () => { if (!shown && !consent.isDestroyed()) { shown = true; consent.show(); } };
+  const revealTimer = setTimeout(reveal, 12_000);
   consent.webContents.setWindowOpenHandler(({ url }) => {
     if (/^https:/i.test(url) && !isPlatformUrl(url)) void shell.openExternal(url);
     return { action: "deny" };
@@ -165,13 +183,14 @@ async function connect(host: BridgeHost, force: boolean): Promise<{ ok: boolean;
   consent.webContents.on("page-title-updated", (event) => event.preventDefault());
   let closed = false;
   consent.on("closed", () => { closed = true; });
-  await consent.loadURL(consentUrl).catch((error) => log.warn("fincodes consent load", error));
+  await consent.loadURL(consentUrl, { extraHeaders: `${DESKTOP_PAIR_HEADER}: 1\r\n` }).catch((error) => { log.warn("fincodes consent load", error); reveal(); });
 
   const deadline = Math.min(Number(begun.expiresAt) || Date.now() + 10 * 60_000, Date.now() + 15 * 60_000);
   while (Date.now() < deadline) {
     await wait(1_000);
     const state = await finCodes.call<{ paired: boolean; error: string; machine: { machineId: string; name: string; org: string } | null }>("pair/state").catch(() => null);
     if (state?.paired) {
+      clearTimeout(revealTimer);
       if (!closed) consent.close();
       host.focus();
       // Say, outside the page, which workspace this computer now works for.
@@ -179,12 +198,14 @@ async function connect(host: BridgeHost, force: boolean): Promise<{ ok: boolean;
       return { ok: true, machineId: state.machine?.machineId };
     }
     if (state?.error) {
+      clearTimeout(revealTimer);
       if (!closed) consent.close();
       return { ok: false, reason: /denied/i.test(state.error) ? "denied" : state.error };
     }
     // Closing the window is "not now". The code expires on its own.
-    if (closed) return { ok: false, reason: "cancelled" };
+    if (closed) { clearTimeout(revealTimer); return { ok: false, reason: "cancelled" }; }
   }
+  clearTimeout(revealTimer);
   if (!closed) consent.close();
   return { ok: false, reason: "The code expired. Try again." };
 }

@@ -11,7 +11,7 @@
 //   1. tell the shell which theme the platform is in, so the titlebar and the
 //      Windows caption buttons repaint in step with `<html data-theme>`;
 //   2. expose `window.fincraftlyDesktop`: a marker so the platform can detect
-//      the app, and the FinCodes requests Local Work uses on this computer.
+//      the app, and the FinCodes requests a department page uses on this computer.
 //
 // It exposes NO way for page scripts to reach Node, and exactly three IPC
 // requests (window.fincraftlyDesktop.fincodes) that the main process vets.
