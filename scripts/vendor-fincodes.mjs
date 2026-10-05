@@ -2,13 +2,13 @@
 // scripts/vendor-fincodes.mjs — put the FinCodes program into this app.
 // -----------------------------------------------------------------------------
 // Copies the built FinCodes bundle (fincodes.mjs + its pinned tree-sitter
-// grammars) from the RacLink_FinCodes repo into vendor/fincodes/, writes its
+// grammars) from the Fincraftly_FinCodes repo into vendor/fincodes/, writes its
 // VERSION, and writes the two terminal shims. electron-builder then ships
 // vendor/fincodes as resources/fincodes (outside the asar, so the app's own
 // executable can run it as Node — see src/main/fincodes/host.ts).
 //
 //   FINCODES_DIST=<dir> node scripts/vendor-fincodes.mjs
-//   default dir: ../RacLink_FinCodes/packages/daemon/dist (run `npm run build` there first)
+//   default dir: ../Fincraftly_FinCodes/packages/daemon/dist (run `npm run build` there first)
 //
 // vendor/ is not committed: this public repo ships the built program in the
 // installer, not in git.
@@ -20,10 +20,10 @@ import { readFileSync } from "node:fs";
 import { copyFileSync, existsSync, mkdirSync, readdirSync, rmSync, writeFileSync } from "node:fs";
 import { join, resolve } from "node:path";
 
-const source = resolve(process.env.FINCODES_DIST || "../RacLink_FinCodes/packages/daemon/dist");
+const source = resolve(process.env.FINCODES_DIST || "../Fincraftly_FinCodes/packages/daemon/dist");
 const target = resolve("vendor/fincodes");
 if (!existsSync(join(source, "fincodes.mjs"))) {
-  console.error(`No FinCodes build at ${source}. Build it first (npm run build in RacLink_FinCodes) or set FINCODES_DIST.`);
+  console.error(`No FinCodes build at ${source}. Build it first (npm run build in Fincraftly_FinCodes) or set FINCODES_DIST.`);
   process.exit(1);
 }
 rmSync(target, { recursive: true, force: true });
