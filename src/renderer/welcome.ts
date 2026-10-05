@@ -4,7 +4,7 @@
 // =============================================================================
 
 (() => {
-  const shell = window.fincraftlyShell;
+  const shell = window.raclinkShell;
   const icons = window.ShellIcons;
 
   const byId = <T extends HTMLElement>(id: string): T => {
@@ -29,7 +29,7 @@
     document.documentElement.setAttribute("data-theme", state.theme);
     root.dataset.phase = state.authPhase;
     error.textContent = state.authError;
-    version.textContent = `FinCraftly for Windows ${state.appVersion}`;
+    version.textContent = `RacLink for Windows ${state.appVersion}`;
   });
 
   shell.ready();

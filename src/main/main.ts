@@ -2,7 +2,7 @@
 // src/main/main.ts
 // -----------------------------------------------------------------------------
 // Process entry point. Enforces a single running instance, registers the
-// `fincraftly://` deep-link scheme, creates the one shell window and wires the
+// `raclink://` deep-link scheme, creates the one shell window and wires the
 // app lifecycle. Everything window-shaped lives in shellWindow.ts.
 // =============================================================================
 
@@ -16,11 +16,11 @@ import { finCodes } from "./fincodes/host";
 import { FinCodesTray } from "./fincodes/tray";
 import { ensureTerminalCommand } from "./fincodes/terminal";
 
-const PROTOCOL = "fincraftly";
+const PROTOCOL = "raclink";
 
 log.initialize();
 log.transports.file.level = "info";
-log.transports.console.level = process.env.FINCRAFTLY_DEV === "1" ? "debug" : false;
+log.transports.console.level = process.env.RACLINK_DEV === "1" ? "debug" : false;
 log.errorHandler.startCatching();
 
 // One instance: a second launch (double-clicking the shortcut, a deep link)
@@ -42,7 +42,7 @@ function deepLinkFromArgv(argv: string[]): string | null {
 }
 
 function bootstrap(): void {
-  app.setAppUserModelId("com.fincraftly.desktop");
+  app.setAppUserModelId("com.raclink.desktop");
   // Every renderer, on every session, identifies as plain Chrome: identity
   // providers refuse user agents that carry an "Electron" or app-name token.
   app.userAgentFallback = browserLikeUserAgent(app.userAgentFallback);
@@ -102,7 +102,7 @@ function startFinCodes(): void {
     changed: () => { void tray?.refresh(); void syncStartWithWindows(); },
   });
 
-  if (process.env.FINCRAFTLY_SMOKE_FINCODES === "1" && !app.isPackaged) {
+  if (process.env.RACLINK_SMOKE_FINCODES === "1" && !app.isPackaged) {
     void import("./fincodesSmoke").then(({ runFinCodesSmoke }) => runFinCodesSmoke(window.platformContents()));
   }
 
@@ -122,7 +122,7 @@ function startFinCodes(): void {
     window.window.hide();
     if (!toldAboutTray && Notification.isSupported()) {
       toldAboutTray = true;
-      new Notification({ title: "FinCraftly is still running", body: "Your AI employees can keep working on this computer. Quit from the tray icon." }).show();
+      new Notification({ title: "RacLink is still running", body: "Your AI employees can keep working on this computer. Quit from the tray icon." }).show();
     }
     void syncStartWithWindows();
   });

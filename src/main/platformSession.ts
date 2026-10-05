@@ -12,7 +12,7 @@ import { app, session, type Session } from "electron";
 import { DESKTOP_HEADER_NAME } from "../shared/config";
 import { isPlatformUrl } from "./platformUrls";
 
-const PARTITION = "persist:fincraftly";
+const PARTITION = "persist:raclink";
 
 /** Permissions the platform legitimately asks for; everything else is denied. */
 const PLATFORM_PERMISSIONS: ReadonlySet<string> = new Set([
@@ -29,8 +29,8 @@ let platformSession: Session | null = null;
 /** Browser-like user agent: Electron's own, minus the app and Electron tokens. */
 export function browserLikeUserAgent(defaultUserAgent: string): string {
   return defaultUserAgent
-    .replace(/\s?FinCraftly\/\S+/i, "")
-    .replace(/\s?fincraftly-desktop\/\S+/i, "")
+    .replace(/\s?RacLink\/\S+/i, "")
+    .replace(/\s?raclink-desktop\/\S+/i, "")
     .replace(/\s?Electron\/\S+/i, "")
     .replace(/\s{2,}/g, " ")
     .trim();

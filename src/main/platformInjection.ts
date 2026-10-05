@@ -39,7 +39,7 @@ const RAIL_PILL = "#1F242B";
 const RAIL_PILL_HOVER = "#262C34";
 
 export const PLATFORM_CSS = `
-/* ═══ FinCraftly Desktop — the platform reshaped for the Windows app ═══ */
+/* ═══ RacLink Desktop — the platform reshaped for the Windows app ═══ */
 
 /* ── 1. Topbar: no notch, no Desktop toggle; a Hydra button instead ─────── */
 [data-tour="tb-hydra"] {
@@ -51,13 +51,13 @@ button[aria-label="Toggle desktop mode"] {
 /* Our Hydra button clones the Desktop toggle's own classes + inline style, so
    it inherits the pill exactly; only the hover/press feedback is ours (the
    original's came from framer-motion). */
-#fincraftly-desktop-hydra {
+#raclink-desktop-hydra {
   cursor: pointer;
   transition: transform 120ms ease, background-color 120ms ease;
 }
-#fincraftly-desktop-hydra:hover { transform: scale(1.06); }
-#fincraftly-desktop-hydra:active { transform: scale(0.94); }
-#fincraftly-desktop-hydra img { width: 16px; height: 16px; object-fit: contain; display: block; }
+#raclink-desktop-hydra:hover { transform: scale(1.06); }
+#raclink-desktop-hydra:active { transform: scale(0.94); }
+#raclink-desktop-hydra img { width: 16px; height: 16px; object-fit: contain; display: block; }
 
 /* ── 2. The FinOS taskbar (bottom glowing line + the bar it lifts) ──────── */
 [class*="z-[9994]"].fixed.bottom-0,
@@ -212,7 +212,7 @@ button[aria-label="Toggle desktop mode"] {
    the ⋯ click went to the OS (double-click = maximize) and never reached the
    button. A no-drag box over the inset is subtracted from the merged region.
    Inserted by PLATFORM_JS; pointer-events:none so it blocks nothing. */
-#fincraftly-desktop-caption-hole {
+#raclink-desktop-caption-hole {
   position: absolute;
   top: 0;
   right: 0;
@@ -228,7 +228,7 @@ button[aria-label="Toggle desktop mode"] {
    transparent strip the height of the caption buttons. It is inserted by
    PLATFORM_JS and hidden the moment the platform's own draggable bar exists,
    so it never sits on top of the workspace. */
-#fincraftly-desktop-drag-strip {
+#raclink-desktop-drag-strip {
   position: fixed;
   top: 0;
   left: 0;
@@ -242,8 +242,8 @@ button[aria-label="Toggle desktop mode"] {
 /* NOTE: a :has() nested inside :has() is INVALID CSS — the whole rule is
    dropped and the strip then covers the topbar's buttons (the 1.1.4 bug). Keep
    this selector flat; PLATFORM_JS toggles the hidden attribute too as a safety net. */
-html:has(.fin-desktop header [data-tour="tb-credits"]) #fincraftly-desktop-drag-strip,
-#fincraftly-desktop-drag-strip[hidden] {
+html:has(.fin-desktop header [data-tour="tb-credits"]) #raclink-desktop-drag-strip,
+#raclink-desktop-drag-strip[hidden] {
   display: none !important;
 }
 
@@ -268,11 +268,11 @@ export function topbarInsetScript(insetPx: number): string {
 export const PLATFORM_JS = `
 (() => {
   try {
-    document.documentElement.setAttribute("data-fincraftly-desktop", "1");
+    document.documentElement.setAttribute("data-raclink-desktop", "1");
   } catch {}
 
-  const DRAG_STRIP_ID = "fincraftly-desktop-drag-strip";
-  const HYDRA_ID = "fincraftly-desktop-hydra";
+  const DRAG_STRIP_ID = "raclink-desktop-drag-strip";
+  const HYDRA_ID = "raclink-desktop-hydra";
   const TOPBAR = '.fin-desktop header [data-tour="tb-credits"]';
   const DESKTOP_TOGGLE = 'button[aria-label="Toggle desktop mode"]';
 
@@ -342,19 +342,19 @@ export const PLATFORM_JS = `
   const startedAt = Date.now();
   let lastTry = 0;
   const syncSidebarStart = () => {
-    if (window.__fincraftlyDesktopSidebarFolded) return;
+    if (window.__raclinkDesktopSidebarFolded) return;
     const toggle = document.querySelector(SIDEBAR_TOGGLE);
     if (!toggle) return;
-    if (toggle.getAttribute("aria-expanded") === "false") { window.__fincraftlyDesktopSidebarFolded = true; return; }
+    if (toggle.getAttribute("aria-expanded") === "false") { window.__raclinkDesktopSidebarFolded = true; return; }
     const now = Date.now();
-    if (now - startedAt > 15000) { window.__fincraftlyDesktopSidebarFolded = true; return; }
+    if (now - startedAt > 15000) { window.__raclinkDesktopSidebarFolded = true; return; }
     if (now - lastTry < 300) return;
     lastTry = now;
     toggle.click();
   };
 
   // ── The no-drag hole in the topbar, under the shell's ⋯ button (see CSS). ──
-  const HOLE_ID = "fincraftly-desktop-caption-hole";
+  const HOLE_ID = "raclink-desktop-caption-hole";
   const syncCaptionHole = () => {
     const credits = document.querySelector(TOPBAR);
     const header = credits ? credits.closest("header") : null;
@@ -382,10 +382,10 @@ export const PLATFORM_JS = `
     scheduled = true;
     requestAnimationFrame(() => { scheduled = false; sync(); });
   };
-  if (!window.__fincraftlyDesktopObserver) {
+  if (!window.__raclinkDesktopObserver) {
     const observer = new MutationObserver(schedule);
     observer.observe(document.documentElement, { childList: true, subtree: true });
-    window.__fincraftlyDesktopObserver = observer;
+    window.__raclinkDesktopObserver = observer;
   }
 })();
 `;

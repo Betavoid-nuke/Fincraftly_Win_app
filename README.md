@@ -1,9 +1,9 @@
-# FinCraftly for Windows
+# RacLink for Windows
 
-The FinCraftly platform as an installable Windows app, scoped to the **AI Workspace**.
+The RacLink platform as an installable Windows app, scoped to the **AI Workspace**.
 
 It is a native desktop shell (Electron) around the live platform at
-`https://fincraftly.com`. Nothing from the platform is copied or forked: the
+`https://raclink.si`. Nothing from the platform is copied or forked: the
 app signs in with the real Clerk session, talks to the real APIs, and is
 always on the version that is deployed. What the shell adds is:
 
@@ -23,14 +23,14 @@ always on the version that is deployed. What the shell adds is:
   one sidebar click away. The AIWS console's own tabs (Agents, Approvals, Integrations,
   Information Bank) keep working — they live inside the console;
 - sign-in hops that leave the platform's origin but come straight back — Clerk's
-  session handshake on `clerk.fincraftly.com`, an auth provider carrying a
-  `redirect_url` to fincraftly.com — load **inside** the app (they are what
+  session handshake on `clerk.raclink.si`, an auth provider carrying a
+  `redirect_url` to raclink.si — load **inside** the app (they are what
   gives the app's own session its cookies); every other off-platform link
   opens in the default browser;
 - a persistent session (stay signed in), a branded offline page with retry,
-  window size/position memory, single-instance behaviour, `fincraftly://`
+  window size/position memory, single-instance behaviour, `raclink://`
   deep links, and silent auto-updates once a feed is configured;
-- a branded NSIS installer (`FinCraftly-Setup-<version>.exe`).
+- a branded NSIS installer (`RacLink-Setup-<version>.exe`).
 
 ## Requirements
 
@@ -44,11 +44,11 @@ npm install
 npm run dist
 ```
 
-The installer lands in `release\FinCraftly-Setup-<version>.exe`. Run it, pick a
-folder (or keep the default), and FinCraftly opens when it finishes. The app is
+The installer lands in `release\RacLink-Setup-<version>.exe`. Run it, pick a
+folder (or keep the default), and RacLink opens when it finishes. The app is
 also in the Start menu and on the desktop.
 
-`npm run dist:dir` builds the unpacked app (`release\win-unpacked\FinCraftly.exe`)
+`npm run dist:dir` builds the unpacked app (`release\win-unpacked\RacLink.exe`)
 without an installer — handy for a quick look.
 
 ### Signing (recommended before public distribution)
@@ -69,25 +69,25 @@ version up silently and apply it on the next launch.
 
 ```powershell
 npm install
-npm run dev              # against https://fincraftly.com
+npm run dev              # against https://raclink.si
 npm run dev:local        # against a local platform on http://localhost:3000
 ```
 
-`FINCRAFTLY_DEV=1` (set by both scripts) enables DevTools (`Ctrl+Shift+I`) and
-disables the updater. `FINCRAFTLY_ORIGIN` overrides the platform origin.
+`RACLINK_DEV=1` (set by both scripts) enables DevTools (`Ctrl+Shift+I`) and
+disables the updater. `RACLINK_ORIGIN` overrides the platform origin.
 
 ### Smoke test (no platform needed)
 
 ```powershell
 node scripts/fake-platform.mjs                          # terminal 1
-$env:FINCRAFTLY_SMOKE=1; npm run dev:local -- ; # terminal 2 (see below)
+$env:RACLINK_SMOKE=1; npm run dev:local -- ; # terminal 2 (see below)
 ```
 
 `scripts/fake-platform.mjs` is a 100-line stand-in for the platform (same URL
-shapes, `data-theme`, sidebar hook, navigation bus). With `FINCRAFTLY_SMOKE=1`
-and `FINCRAFTLY_ORIGIN=http://127.0.0.1:3999` the app drives itself through
+shapes, `data-theme`, sidebar hook, navigation bus). With `RACLINK_SMOKE=1`
+and `RACLINK_ORIGIN=http://127.0.0.1:3999` the app drives itself through
 open-menu → Settings → Home → theme toggle → Sign out and logs `SMOKE …` lines
-with the result of each step (`%AppData%\FinCraftly\logs\main.log`).
+with the result of each step (`%AppData%\RacLink\logs\main.log`).
 
 ## Keyboard
 
@@ -112,7 +112,7 @@ src/
   main/windowState.ts      remembers bounds / maximized / theme
   main/updater.ts          electron-updater, silent
   main/smoke.ts            dev-only scripted UI test
-  preload/platformPreload.ts  sandboxed; reports <html data-theme> to the shell, exposes window.fincraftlyDesktop
+  preload/platformPreload.ts  sandboxed; reports <html data-theme> to the shell, exposes window.raclinkDesktop
   preload/shellPreload.ts     bridge for the shell's own pages
   renderer/                titlebar.html, menu.html, offline.html (+ css/ts, no framework)
 build/                     icon.ico, installer sidebar/header art
@@ -121,7 +121,7 @@ electron-builder.yml       packaging + NSIS
 
 The platform is reshaped by **hiding, never re-implementing**: one injected
 stylesheet keyed on the platform's stable `data-tour` attributes. Navigation
-between views uses the platform's own bus (`window.FinCraftlyUI.navigateToView`),
+between views uses the platform's own bus (`window.RacLinkUI.navigateToView`),
 so switching to Settings is instant and does not reload the page; a full URL
 load is the fallback when the page is not the dashboard (sign-in, offline).
 
@@ -131,6 +131,6 @@ load is the fallback when the page is not the dashboard (sign-in, offline).
   with a `view` navigates to that platform view; add the view to
   `ALLOWED_VIEWS` too or the shell will bounce it back to the AI Workspace.
 - **Point at another origin** → `DEFAULT_PLATFORM_ORIGIN` (or the
-  `FINCRAFTLY_ORIGIN` env var for a one-off run).
+  `RACLINK_ORIGIN` env var for a one-off run).
 - **Platform markup changed and the sidebar came back?** → the selectors in
   `src/main/platformInjection.ts`.

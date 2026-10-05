@@ -1,7 +1,7 @@
 // =============================================================================
 // src/preload/platformPreload.ts
 // -----------------------------------------------------------------------------
-// Runs in the platform page (fincraftly.com) with context isolation ON and the
+// Runs in the platform page (raclink.si) with context isolation ON and the
 // renderer SANDBOX ON — it is the only code that runs beside remote content, so
 // it gets the strictest settings and imports nothing from the app (a sandboxed
 // preload cannot `require` local modules; the two channel names below are
@@ -10,11 +10,11 @@
 // Its jobs:
 //   1. tell the shell which theme the platform is in, so the titlebar and the
 //      Windows caption buttons repaint in step with `<html data-theme>`;
-//   2. expose `window.fincraftlyDesktop`: a marker so the platform can detect
+//   2. expose `window.raclinkDesktop`: a marker so the platform can detect
 //      the app, and the FinCodes requests a department page uses on this computer.
 //
 // It exposes NO way for page scripts to reach Node, and exactly three IPC
-// requests (window.fincraftlyDesktop.fincodes) that the main process vets.
+// requests (window.raclinkDesktop.fincodes) that the main process vets.
 // =============================================================================
 
 import { contextBridge, ipcRenderer } from "electron";
@@ -87,8 +87,8 @@ const fincodes = Object.freeze({
   connectFolder: (options?: { profile?: string }) => ipcRenderer.invoke("fincodes:connect-folder", { profile: typeof options?.profile === "string" ? options.profile.slice(0, 20) : "guarded" }),
 });
 
-contextBridge.exposeInMainWorld("fincraftlyDesktop", {
-  version: process.argv.find((arg) => arg.startsWith("--fincraftly-version="))?.slice("--fincraftly-version=".length) ?? "",
+contextBridge.exposeInMainWorld("raclinkDesktop", {
+  version: process.argv.find((arg) => arg.startsWith("--raclink-version="))?.slice("--raclink-version=".length) ?? "",
   platform: "windows",
   fincodes,
 });

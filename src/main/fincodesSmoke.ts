@@ -1,15 +1,15 @@
 // =============================================================================
 // src/main/fincodesSmoke.ts
 // -----------------------------------------------------------------------------
-// Scripted check of FinCodes inside the app, run with FINCRAFTLY_SMOKE_FINCODES=1
-// in a development build against a local platform (FINCRAFTLY_ORIGIN). Never
+// Scripted check of FinCodes inside the app, run with RACLINK_SMOKE_FINCODES=1
+// in a development build against a local platform (RACLINK_ORIGIN). Never
 // active in a packaged build. Results are logged as "SMOKE-FC …" lines.
 //
 //   1. the bundled FinCodes starts under the app's own executable (as Node)
-//   2. a platform page reaches the bridge (window.fincraftlyDesktop.fincodes)
+//   2. a platform page reaches the bridge (window.raclinkDesktop.fincodes)
 //      and a non-platform page does not
 //   3. the daemon-run pairing hands out a code (the harness approves it)
-//   4. a folder is granted (FINCRAFTLY_SMOKE_FOLDER) — the same call the
+//   4. a folder is granted (RACLINK_SMOKE_FOLDER) — the same call the
 //      folder picker path makes, minus the native dialog
 // =============================================================================
 
@@ -33,7 +33,7 @@ export async function runFinCodesSmoke(page: WebContents): Promise<void> {
 
     // The fake platform's session cookies (scripts/fake-platform.mjs), so /dashboard renders.
     for (const name of ["fc_session", "fc_handshake"]) await getPlatformSession().cookies.set({ url: platformOrigin(), name, value: "1" }).catch(() => undefined);
-    const ask = "window.fincraftlyDesktop && window.fincraftlyDesktop.fincodes ? window.fincraftlyDesktop.fincodes.status() : 'no bridge'";
+    const ask = "window.raclinkDesktop && window.raclinkDesktop.fincodes ? window.raclinkDesktop.fincodes.status() : 'no bridge'";
     await load(page, `${platformOrigin()}/dashboard/user_2test/AIWS`);
     await wait(1_500);
     log.info(`SMOKE-FC page at ${page.getURL()}`);
@@ -62,7 +62,7 @@ export async function runFinCodesSmoke(page: WebContents): Promise<void> {
       result("pairing completes after approval", paired);
     }
 
-    const folder = process.env.FINCRAFTLY_SMOKE_FOLDER;
+    const folder = process.env.RACLINK_SMOKE_FOLDER;
     if (folder) {
       const grant = await finCodes.call<{ ok: boolean; refused?: string; grant?: { workspaceId: string } }>("workspace/grant", { path: folder, profile: "guarded", confirmed: true }, 60_000);
       result("folder grant", grant.ok, grant.ok ? grant.grant?.workspaceId ?? "" : grant.refused ?? "");

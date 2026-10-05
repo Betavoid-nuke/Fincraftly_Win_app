@@ -1,16 +1,16 @@
 {
-  "name": "fincraftly-desktop",
-  "productName": "FinCraftly",
-  "version": "1.3.2",
-  "description": "FinCraftly for Windows \u2014 the AI Workspace as a native desktop app, with FinCodes: AI employees coding on this computer.",
+  "name": "raclink-desktop",
+  "productName": "RacLink",
+  "version": "1.3.3",
+  "description": "RacLink for Windows \u2014 the AI Workspace as a native desktop app, with FinCodes: AI employees coding on this computer.",
   "author": {
-    "name": "FinCraftly",
-    "email": "support@fincraftly.com"
+    "name": "RacLink",
+    "email": "support@raclink.si"
   },
-  "homepage": "https://fincraftly.com",
+  "homepage": "https://raclink.si",
   "repository": {
     "type": "git",
-    "url": "https://github.com/fincraftly/fincraftly-desktop.git"
+    "url": "https://github.com/raclink/raclink-desktop.git"
   },
   "license": "UNLICENSED",
   "private": true,
@@ -20,8 +20,8 @@
     "build": "npm run clean && tsc -p tsconfig.json && node scripts/copy-static.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "start": "npm run build && electron .",
-    "dev": "npm run build && cross-env FINCRAFTLY_DEV=1 electron .",
-    "dev:local": "npm run build && cross-env FINCRAFTLY_DEV=1 FINCRAFTLY_ORIGIN=http://localhost:3000 electron .",
+    "dev": "npm run build && cross-env RACLINK_DEV=1 electron .",
+    "dev:local": "npm run build && cross-env RACLINK_DEV=1 RACLINK_ORIGIN=http://localhost:3000 electron .",
     "dist": "npm run vendor:fincodes && npm run build && electron-builder --win --x64 --publish never",
     "dist:dir": "npm run vendor:fincodes && npm run build && electron-builder --win --x64 --dir --publish never",
     "postinstall": "electron-builder install-app-deps",

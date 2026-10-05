@@ -38,4 +38,4 @@ const bridge: ShellBridge = {
   tokens: THEME_TOKENS,
 };
 
-contextBridge.exposeInMainWorld("fincraftlyShell", bridge);
+contextBridge.exposeInMainWorld("raclinkShell", bridge);

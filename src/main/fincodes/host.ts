@@ -120,7 +120,7 @@ export class FinCodesHost {
   }
 
   private spawnDaemon(): void {
-    if (!this.bundleIntact()) { log.error("fincodes: the bundled program does not match this app's build — not starting it. Reinstall FinCraftly."); return; }
+    if (!this.bundleIntact()) { log.error("fincodes: the bundled program does not match this app's build — not starting it. Reinstall RacLink."); return; }
     const script = join(bundleDir(), "fincodes.mjs");
     const child = spawn(process.execPath, [script, "daemon", "run"], {
       detached: true,

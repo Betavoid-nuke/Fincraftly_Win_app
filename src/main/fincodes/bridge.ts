@@ -77,7 +77,7 @@ function trusted(event: IpcMainInvokeEvent, host: BridgeHost): boolean {
  * ONE request it builds itself; a page in a browser cannot set it, so a link with
  * `auto=1` typed anywhere else still shows the ordinary Connect button.
  */
-const DESKTOP_PAIR_HEADER = "x-fincraftly-desktop-pair";
+const DESKTOP_PAIR_HEADER = "x-raclink-desktop-pair";
 
 /** The consent window may show the platform and the platform's own Clerk frontend (session handshake) — nothing else. */
 function consentMayShow(url: string): boolean {
@@ -126,7 +126,7 @@ async function connect(host: BridgeHost, force: boolean): Promise<{ ok: boolean;
     if (state.paired) {
       const answer = await dialog.showMessageBox(host.window(), {
         type: "warning",
-        title: "FinCraftly",
+        title: "RacLink",
         message: `Disconnect this computer from ${state.machine?.org || "its current workspace"}?`,
         detail: "Its jobs stop and its folders are released. You then approve the new connection on the page that opens, and connect folders again.",
         buttons: ["Cancel", "Disconnect and reconnect"],
@@ -230,7 +230,7 @@ async function connectFolder(host: BridgeHost, profile: Profile) {
   if (profile === "trusted" || profile === "autonomous") {
     const answer = await dialog.showMessageBox(host.window(), {
       type: "warning",
-      title: "FinCraftly",
+      title: "RacLink",
       message: `Let AI employees work in "${name}" as ${profile === "trusted" ? "Trusted" : "Autonomous"}?`,
       detail: `${path}\n\nIn this mode ${PROFILE_WORDS[profile]}. Pushing, deleting, installing and anything forced still always ask.`,
       buttons: ["Cancel", "Allow"],
@@ -245,7 +245,7 @@ async function connectFolder(host: BridgeHost, profile: Profile) {
   if (!outcome.ok && outcome.needsConfirmation) {
     const answer = await dialog.showMessageBox(host.window(), {
       type: "warning",
-      title: "FinCraftly",
+      title: "RacLink",
       message: `Connect "${name}" anyway?`,
       detail: `${path}\n\n${(outcome.warnings || []).map((warning) => `• ${warning}`).join("\n")}\n\nFiles holding secrets (.env, keys) are never read or sent, whatever you choose here.`,
       buttons: ["Cancel", "Connect anyway"],
@@ -258,7 +258,7 @@ async function connectFolder(host: BridgeHost, profile: Profile) {
   }
   if (!outcome.ok || !outcome.grant) {
     const reason = outcome.refused || "That folder cannot be connected.";
-    await dialog.showMessageBox(host.window(), { type: "error", title: "FinCraftly", message: `"${name}" can't be connected`, detail: reason, buttons: ["OK"], noLink: true });
+    await dialog.showMessageBox(host.window(), { type: "error", title: "RacLink", message: `"${name}" can't be connected`, detail: reason, buttons: ["OK"], noLink: true });
     return { ok: false, reason };
   }
   const machine = await finCodes.call<{ machine: { machineId: string } | null }>("pair/state");

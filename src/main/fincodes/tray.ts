@@ -5,7 +5,7 @@
 // is being worked on, approvals waiting (with a toast for each new one — click
 // it and the app opens the department that raised it), and the four actions a person
 // needs without opening the app: Open, Stop the current job, Pause FinCodes on
-// this computer, Panic. "Quit FinCraftly" is the only way the app itself exits
+// this computer, Panic. "Quit RacLink" is the only way the app itself exits
 // while FinCodes is connected (closing the window hides it to the tray).
 // =============================================================================
 
@@ -31,7 +31,7 @@ export class FinCodesTray {
 
   constructor(private readonly host: TrayHost) {
     this.tray = new Tray(nativeImage.createFromPath(join(__dirname, "../../renderer/assets/icon.png")).resize({ width: 16, height: 16 }));
-    this.tray.setToolTip("FinCraftly");
+    this.tray.setToolTip("RacLink");
     this.tray.on("click", () => this.host.show());
     this.events.onNotification = (method, params) => this.onEvent(method, params);
     this.events.onClose = () => { setTimeout(() => void this.subscribe(), 5_000); };
@@ -80,7 +80,7 @@ export class FinCodesTray {
   }
 
   private async act(method: string, params: Record<string, unknown> = {}): Promise<void> {
-    try { await finCodes.call(method, params); } catch (error) { dialog.showErrorBox("FinCraftly", error instanceof Error ? error.message : String(error)); }
+    try { await finCodes.call(method, params); } catch (error) { dialog.showErrorBox("RacLink", error instanceof Error ? error.message : String(error)); }
     void this.refresh();
   }
 
@@ -89,7 +89,7 @@ export class FinCodesTray {
     const working = status?.sessions.find((session) => session.status === "running");
     const connected = status?.connection === "connected";
     const lines: MenuItemConstructorOptions[] = [
-      { label: "FinCraftly", enabled: false },
+      { label: "RacLink", enabled: false },
       {
         label: !status ? "○ FinCodes not running" : !status.paired ? "○ This computer is not connected" : `${connected ? "●" : "○"} ${connected ? "Connected" : status.connection}${status.machine ? ` · ${status.machine.org}` : ""}`,
         enabled: false,
@@ -97,7 +97,7 @@ export class FinCodesTray {
       ...(working ? [{ label: `Working — ${working.aie.name}: ${working.todo.slice(0, 40)}`, click: () => this.host.openPath(`/platform/AIWS?job=${encodeURIComponent(working.jobId)}`) }] : []),
       ...(status?.pendingApprovals ? [{ label: `${status.pendingApprovals} approval${status.pendingApprovals === 1 ? "" : "s"} waiting`, click: () => this.host.openPath("/platform/AIWS") }] : []),
       { type: "separator" },
-      { label: "Open FinCraftly", click: () => this.host.show() },
+      { label: "Open RacLink", click: () => this.host.show() },
       { label: "Stop the current job", enabled: !!working, click: () => { if (working) void this.act("session/cancel", { sessionId: working.sessionId }); } },
       { label: "Pause FinCodes on this computer", enabled: !!status, click: () => void this.act("daemon/stop") },
       { type: "separator" },
@@ -110,10 +110,10 @@ export class FinCodesTray {
         },
       },
       { type: "separator" },
-      { label: "Quit FinCraftly", click: () => this.host.quit() },
+      { label: "Quit RacLink", click: () => this.host.quit() },
     ];
     this.tray.setContextMenu(Menu.buildFromTemplate(lines));
-    this.tray.setToolTip(`FinCraftly${status?.pendingApprovals ? ` — ${status.pendingApprovals} approval(s) waiting` : ""}`);
+    this.tray.setToolTip(`RacLink${status?.pendingApprovals ? ` — ${status.pendingApprovals} approval(s) waiting` : ""}`);
     if (process.platform === "win32") app.setBadgeCount(status?.pendingApprovals || 0);
   }
 

@@ -1,13 +1,13 @@
 // =============================================================================
 // src/main/smoke.ts
 // -----------------------------------------------------------------------------
-// Scripted smoke test of the shell, run with FINCRAFTLY_SMOKE=1 against the
+// Scripted smoke test of the shell, run with RACLINK_SMOKE=1 against the
 // fake platform (scripts/fake-platform.mjs). It drives the real UI through
 // synthetic input events and asserts on what the platform page ends up showing.
 // Never active in a packaged build. Results are logged as "SMOKE …" lines.
 //
 // Flow: signed-out start → welcome screen → "Sign in with your browser" →
-// simulated fincraftly://auth deep link → AI Workspace → ⋯ menu → Settings →
+// simulated raclink://auth deep link → AI Workspace → ⋯ menu → Settings →
 // Home → theme toggle → Sign out → welcome screen again.
 // =============================================================================
 
@@ -40,9 +40,9 @@ export interface SmokeTarget {
 
 const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
-/** Full-display screenshot via ImageMagick when FINCRAFTLY_SMOKE_SHOTS=<dir> is set (Linux/Xvfb). */
+/** Full-display screenshot via ImageMagick when RACLINK_SMOKE_SHOTS=<dir> is set (Linux/Xvfb). */
 function screenshot(name: string): Promise<void> {
-  const dir = process.env.FINCRAFTLY_SMOKE_SHOTS;
+  const dir = process.env.RACLINK_SMOKE_SHOTS;
   if (!dir) return Promise.resolve();
   return new Promise((resolve) => {
     execFile("import", ["-window", "root", `${dir}/${name}.png`], () => resolve());
@@ -82,7 +82,7 @@ export async function runSmoke(target: SmokeTarget): Promise<void> {
       const side = document.querySelector('[data-tour="sidebar-root"]');
       const active = document.querySelector('[data-tour="nav-AIWS"]');
       const idle = document.querySelector('[data-tour="nav-Invoices"]');
-      const hydra = document.getElementById("fincraftly-desktop-hydra");
+      const hydra = document.getElementById("raclink-desktop-hydra");
       const toggle = document.querySelector('button[aria-label="Toggle desktop mode"]');
       return [
         "notch shown=" + shown('[data-tour="tb-hydra"]'),
@@ -102,7 +102,7 @@ export async function runSmoke(target: SmokeTarget): Promise<void> {
         "sidebar toggle shown=" + shown('[data-tour="tb-sidebar-toggle"]'),
         "sidebar expanded=" + document.querySelector('[data-tour="tb-sidebar-toggle"]').getAttribute("aria-expanded"),
         "hover strip shown=" + shown("#hover-strip"),
-        "caption hole=" + (() => { const h = document.getElementById("fincraftly-desktop-caption-hole"); if (!h) return "missing"; const r = h.getBoundingClientRect(); return getComputedStyle(h).webkitAppRegion + " " + Math.round(r.width) + "x" + Math.round(r.height) + " at right " + Math.round(window.innerWidth - r.right); })(),
+        "caption hole=" + (() => { const h = document.getElementById("raclink-desktop-caption-hole"); if (!h) return "missing"; const r = h.getBoundingClientRect(); return getComputedStyle(h).webkitAppRegion + " " + Math.round(r.width) + "x" + Math.round(r.height) + " at right " + Math.round(window.innerWidth - r.right); })(),
         "header drag=" + getComputedStyle(document.querySelector(".fin-desktop header")).webkitAppRegion,
       ].join(" | ");
     })()`, true,
@@ -135,7 +135,7 @@ export async function runSmoke(target: SmokeTarget): Promise<void> {
 
   // 2. The browser comes back with a ticket (simulated deep link).
   const state = target.pendingAuthState() ?? "";
-  target.openDeepLink(`fincraftly://auth?ticket=smoke-ticket&state=${state}`);
+  target.openDeepLink(`raclink://auth?ticket=smoke-ticket&state=${state}`);
   await wait(3500);
   log.info("SMOKE after ticket; welcome shown =", target.welcomeShown(), "| heading =", await heading(), "| topbar inset =", await topbarInset(), "| topbar clickable =", await topbarClickable());
   await screenshot("C-signed-in");
@@ -153,7 +153,7 @@ export async function runSmoke(target: SmokeTarget): Promise<void> {
   await wait(1200);
   log.info("SMOKE menu open =", await menuVisibleRows(), "rows");
   await screenshot("E-menu-open");
-  platform.executeJavaScript("document.getElementById('fincraftly-desktop-hydra').click()", true).catch(() => undefined);
+  platform.executeJavaScript("document.getElementById('raclink-desktop-hydra').click()", true).catch(() => undefined);
   await wait(400);
   log.info("SMOKE after Hydra click;", await platform.executeJavaScript("document.getElementById('hydra').textContent", true));
 

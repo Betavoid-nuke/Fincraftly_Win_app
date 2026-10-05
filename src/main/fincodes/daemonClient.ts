@@ -8,7 +8,7 @@
 // Every request carries the daemon's rotating token from ~/.fincodes/ipc.token,
 // read fresh on each call (the daemon mints a new one each time it starts).
 // This file mirrors packages/daemon/src/paths.ts → ipcEndpoint() and daemon/ipc.ts
-// in the Fincraftly_FinCodes repo; keep the two in step.
+// in the RacLink_FinCodes repo; keep the two in step.
 // =============================================================================
 
 import { createConnection, type Socket } from "node:net";

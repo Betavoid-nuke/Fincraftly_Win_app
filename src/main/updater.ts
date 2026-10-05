@@ -8,9 +8,9 @@
 //
 // ── SUPPLY-CHAIN HARDENING (security audit finding #4, 2026-09-06) ──────────
 // The update feed and the installer are served by the SAME host as the web app
-// (https://fincraftly.com/desktop/updates), and this app auto-downloads and
+// (https://raclink.si/desktop/updates), and this app auto-downloads and
 // auto-installs. electron-updater's SHA-512 check is computed from latest.yml on
-// that same host, so it proves "I got what the host offered" — not "FinCraftly
+// that same host, so it proves "I got what the host offered" — not "RacLink
 // published this". Whoever can write to that path can ship code to every
 // customer machine. Two independent checks close that, and this file wires both:
 //
@@ -42,10 +42,10 @@ const RECHECK_INTERVAL_MS = 6 * 60 * 60 * 1000;
  * independent feed-signature check; electron-updater reads its own copy from the
  * app-update.yml the packager writes.
  */
-const UPDATE_FEED_URL = process.env.FINCRAFTLY_UPDATE_FEED || "https://fincraftly.com/desktop/updates";
+const UPDATE_FEED_URL = process.env.RACLINK_UPDATE_FEED || "https://raclink.si/desktop/updates";
 
 export function startAutoUpdates(): void {
-  if (!app.isPackaged || process.env.FINCRAFTLY_DEV === "1") return;
+  if (!app.isPackaged || process.env.RACLINK_DEV === "1") return;
 
   // Loaded lazily so a missing feed file cannot affect startup.
   let autoUpdater: typeof import("electron-updater").autoUpdater;
@@ -71,7 +71,7 @@ export function startAutoUpdates(): void {
   const check = async () => {
     try {
       // INDEPENDENT INTEGRITY GATE. Nothing is downloaded until the feed proves
-      // it came from FinCraftly's release key — when that key is configured.
+      // it came from RacLink's release key — when that key is configured.
       const verdict = await verifyUpdateFeed(UPDATE_FEED_URL);
       if (verdict.status === "rejected") {
         // Deliberately silent to the user and non-fatal to the app: an update

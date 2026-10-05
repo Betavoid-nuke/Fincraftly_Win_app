@@ -3,7 +3,7 @@
 // =============================================================================
 
 (() => {
-  const shell = window.fincraftlyShell;
+  const shell = window.raclinkShell;
   const button = document.getElementById("menu") as HTMLButtonElement | null;
   if (!button) throw new Error("menubutton: #menu missing");
 

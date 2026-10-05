@@ -18,10 +18,10 @@ import {
 
 let cachedOrigin: string | null = null;
 
-/** The platform origin, e.g. `https://fincraftly.com` (no trailing slash). */
+/** The platform origin, e.g. `https://raclink.si` (no trailing slash). */
 export function platformOrigin(): string {
   if (cachedOrigin) return cachedOrigin;
-  const fromEnv = process.env.FINCRAFTLY_ORIGIN?.trim();
+  const fromEnv = process.env.RACLINK_ORIGIN?.trim();
   let origin = DEFAULT_PLATFORM_ORIGIN;
   if (fromEnv) {
     try {
@@ -49,7 +49,7 @@ const RETURN_URL_PARAMS = ["redirect_url", "redirect_uri", "return_to", "returnT
  * True for a URL that is a hop in the platform's own sign-in flow on another
  * host: Clerk's frontend API (the session handshake) or any auth provider
  * redirect that carries a return address back to the platform. Such a URL
- * must load INSIDE the app — it comes straight back to fincraftly.com with
+ * must load INSIDE the app — it comes straight back to raclink.si with
  * the session the app's own cookie jar needs. Everything else off-origin
  * belongs in the person's browser.
  */

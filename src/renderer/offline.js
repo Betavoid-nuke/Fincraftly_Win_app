@@ -10,7 +10,7 @@
   if (reason && reasonNode) reasonNode.textContent = reason;
 
   const retry = document.getElementById("retry");
-  const target = params.get("retry") || "https://fincraftly.com/dashboard";
+  const target = params.get("retry") || "https://raclink.si/dashboard";
   const attempt = () => {
     retry.disabled = true;
     retry.textContent = "Connecting…";

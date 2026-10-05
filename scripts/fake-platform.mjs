@@ -1,18 +1,18 @@
-// A tiny stand-in for fincraftly.com used ONLY for local smoke tests of the
+// A tiny stand-in for raclink.si used ONLY for local smoke tests of the
 // shell (routing, sidebar hiding, theme sync, menu navigation). It mimics the
 // platform's shapes: `/dashboard` → 302 → `/dashboard/{id}/dashboard`, a
 // `<html data-theme>` document with a `[data-tour="sidebar-root"]` sidebar and
-// the `window.FinCraftlyUI.navigateToView` bus.
+// the `window.RacLinkUI.navigateToView` bus.
 //
 //   node scripts/fake-platform.mjs            # http://127.0.0.1:3999
-//   FINCRAFTLY_ORIGIN=http://127.0.0.1:3999 npm run dev
+//   RACLINK_ORIGIN=http://127.0.0.1:3999 npm run dev
 import { createServer } from "node:http";
 
 const PORT = Number(process.env.PORT ?? 3999);
 const USER = "user_2test";
 
 function page(view, theme) {
-  return `<!doctype html><html lang="en" data-theme="${theme}"><head><meta charset="utf-8"><title>${view} — FinCraftly</title>
+  return `<!doctype html><html lang="en" data-theme="${theme}"><head><meta charset="utf-8"><title>${view} — RacLink</title>
 <style>
  body{margin:0;font-family:Inter,Segoe UI,sans-serif;background:${theme === "dark" ? "#121417" : "#F7F6F3"};color:${theme === "dark" ? "#F7F6F3" : "#121417"}}
  .fin-desktop{display:flex;flex-direction:column;height:100vh}
@@ -23,14 +23,14 @@ function page(view, theme) {
  button{font:inherit}
 </style></head><body>
 <div class="fin-desktop">
-  <header class="topbar"><button data-tour="tb-sidebar-toggle" aria-expanded="true" onclick="(function(b){const a=document.querySelector('[data-tour=sidebar-root]');const open=b.getAttribute('aria-expanded')==='true';b.setAttribute('aria-expanded',String(!open));a.style.display=open?'none':'';})(this)">☰ sidebar</button><strong>FinCraftly</strong>
+  <header class="topbar"><button data-tour="tb-sidebar-toggle" aria-expanded="true" onclick="(function(b){const a=document.querySelector('[data-tour=sidebar-root]');const open=b.getAttribute('aria-expanded')==='true';b.setAttribute('aria-expanded',String(!open));a.style.display=open?'none':'';})(this)">☰ sidebar</button><strong>RacLink</strong>
     <button data-tour="tb-hydra" title="Ask Hydra" style="position:absolute;left:50%;top:0;width:220px;height:44px">NOTCH (must be hidden)</button>
     <button aria-label="Toggle desktop mode" class="relative h-9 rounded-full flex items-center gap-1.5 px-2.5" style="background: rgb(31, 36, 43); border: 1px solid rgba(154, 162, 174, 0.18);">Desktop (must be hidden)</button>
     <span data-tour="tb-credits">1,250 credits</span>
     <button id="theme">toggle theme</button><a href="https://example.com/help" target="_blank">external link</a><span style="margin-left:auto">account ▾</span></header>
   <div class="row">
     <aside data-tour="sidebar-root" class="side flex flex-col">
-      <div class="h-16 flex items-center px-4"><div><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt=""><span>FinCraftly</span></div></div>
+      <div class="h-16 flex items-center px-4"><div><img src="data:image/gif;base64,R0lGODlhAQABAAAAACw=" alt=""><span>RacLink</span></div></div>
       <nav><div><button><span>Finance</span><svg></svg></button><div class="grid"><div>
         <div class="relative group/navitem"><button data-tour="nav-AIWS" style="background: rgba(78, 132, 243, 0.14); border: 1px solid rgba(78, 132, 243, 0.38); color: rgb(78, 132, 243);"><span style="color:#4E84F3"><svg></svg></span><span>AI Workspace</span></button><button title="Open AI Workspace in window">⧉</button></div>
         <div class="relative group/navitem"><button data-tour="nav-Invoices" style="background: transparent; border: 1px solid transparent;"><span style="color:#D9A441"><svg></svg></span><span>Invoices</span></button></div>
@@ -44,12 +44,12 @@ function page(view, theme) {
 <div class="fixed bottom-0 left-1/2 -translate-x-1/2 z-[9994] flex" style="position:fixed;bottom:0;left:50%;height:28px;width:420px;background:#4E84F3" id="taskbar-line">TASKBAR LINE (must be hidden)</div>
 <div class="fixed inset-x-0 bottom-0 z-[9995] h-[86px]" style="position:fixed;bottom:0;left:0;right:0;height:86px;background:#222" id="taskbar">TASKBAR (must be hidden)</div>
 <script>
-  window.FinCraftlyUI = { navigateToView(v){ document.getElementById('view').textContent = v; window.dispatchEvent(new CustomEvent('fincraftly:navigate',{detail:{viewName:v}})); } };
+  window.RacLinkUI = { navigateToView(v){ document.getElementById('view').textContent = v; window.dispatchEvent(new CustomEvent('raclink:navigate',{detail:{viewName:v}})); } };
   document.getElementById('theme').onclick = () => {
     const r = document.documentElement; const next = r.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
     r.setAttribute('data-theme', next); r.classList.toggle('dark', next === 'dark'); location.href = '/theme/' + next;
   };
-  document.getElementById('desktop').textContent = 'desktop marker: ' + (window.fincraftlyDesktop ? JSON.stringify(window.fincraftlyDesktop) : 'none');
+  document.getElementById('desktop').textContent = 'desktop marker: ' + (window.raclinkDesktop ? JSON.stringify(window.raclinkDesktop) : 'none');
   window.addEventListener('hydra:open', () => { document.getElementById('hydra').textContent = 'hydra: open'; });
   window.Clerk = { signOut: async () => { await fetch('/fake/signout'); } };
 </script></body></html>`;
@@ -59,7 +59,7 @@ let theme = "dark";
 
 createServer((req, res) => {
   const url = new URL(req.url ?? "/", `http://${req.headers.host}`);
-  const desktopHeader = req.headers["x-fincraftly-desktop"];
+  const desktopHeader = req.headers["x-raclink-desktop"];
   console.log(req.method, url.pathname, desktopHeader ? `[desktop ${desktopHeader}]` : "", req.headers["user-agent"]?.includes("Electron") ? "!! UA leaks Electron" : "");
 
   if (url.pathname.startsWith("/theme/")) {
@@ -83,7 +83,7 @@ createServer((req, res) => {
     return res.end(`<!doctype html><html data-theme="${theme}"><body style="font-family:sans-serif;background:#121417;color:#fff;padding:40px"><h1>Sign in (must NEVER be visible in the app)</h1></body></html>`);
   }
   // Clerk's session handshake, on ANOTHER origin: the real middleware bounces
-  // a page load through clerk.fincraftly.com when the session cookie is stale
+  // a page load through clerk.raclink.si when the session cookie is stale
   // and Clerk bounces straight back. The app must follow it in-app, never
   // hand it to the browser. Here the "other origin" is 127.0.0.2 → same server.
   if (url.pathname === "/v1/client/handshake") {

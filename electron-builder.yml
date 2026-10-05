@@ -1,17 +1,17 @@
 # =============================================================================
-# electron-builder.yml — packaging for FinCraftly for Windows
+# electron-builder.yml — packaging for RacLink for Windows
 # -----------------------------------------------------------------------------
 # `npm run dist` produces a branded NSIS installer in release/:
-#   FinCraftly-Setup-<version>.exe
+#   RacLink-Setup-<version>.exe
 # The installer draws its own three screens (build/installer.nsh + build/art):
 # Welcome → Installing → Done, per-user, adds Start-menu + desktop shortcuts and
 # offers to launch the app. Uninstall is registered in Windows Settings.
 # =============================================================================
 
-appId: com.fincraftly.desktop
-productName: FinCraftly
-copyright: Copyright © 2026 FinCraftly
-executableName: FinCraftly
+appId: com.raclink.desktop
+productName: RacLink
+copyright: Copyright © 2026 RacLink
+executableName: RacLink
 
 directories:
   output: release
@@ -41,10 +41,10 @@ win:
     - target: nsis
       arch: [x64]
   icon: build/icon.ico
-  artifactName: FinCraftly-Setup-${version}.${ext}
+  artifactName: RacLink-Setup-${version}.${ext}
   # ── CODE SIGNING (security audit finding #4, 2026-09-06) ───────────────────
   # Builds are currently UNSIGNED. That matters more than the SmartScreen prompt:
-  # the auto-updater downloads and installs from https://fincraftly.com/desktop/
+  # the auto-updater downloads and installs from https://raclink.si/desktop/
   # updates — the same host as the web app — and electron-updater's SHA-512 check
   # is read from latest.yml on that same host. So a compromise of the web host is
   # remote code execution on every customer machine, with no independent check to
@@ -60,7 +60,7 @@ win:
   # a wrong value would block every legitimate update.
   #
   # publisherName:
-  #   - FinCraftly   # ← must equal the certificate subject CN
+  #   - RacLink   # ← must equal the certificate subject CN
   signAndEditExecutable: true
   # Verify the publisher signature of a downloaded update before installing it.
   # This is the default, set explicitly so it cannot be lost in a refactor. It is
@@ -79,20 +79,20 @@ nsis:
   createStartMenuShortcut: true
   runAfterFinish: true
   deleteAppDataOnUninstall: false
-  shortcutName: FinCraftly
-  uninstallDisplayName: FinCraftly
+  shortcutName: RacLink
+  uninstallDisplayName: RacLink
   installerIcon: build/icon.ico
   uninstallerIcon: build/icon.ico
   # Only the uninstaller still uses MUI's sidebar; the installer draws its own
   # screens from build/art/*.bmp (see build/installer.nsh, build/installer-art.py).
   installerSidebar: build/installerSidebar.bmp
   uninstallerSidebar: build/uninstallerSidebar.bmp
-  artifactName: FinCraftly-Setup-${version}.${ext}
+  artifactName: RacLink-Setup-${version}.${ext}
 
-# ── Deep links (fincraftly://settings etc.) ─────────────────────────────────
+# ── Deep links (raclink://settings etc.) ─────────────────────────────────
 protocols:
-  - name: FinCraftly
-    schemes: [fincraftly]
+  - name: RacLink
+    schemes: [raclink]
 
 # ── Auto-update feed ─────────────────────────────────────────────────────────
 # A static host that serves the files electron-builder writes to release/
@@ -115,5 +115,5 @@ protocols:
 #      Upload latest.yml.sig with every release.
 publish:
   provider: generic
-  url: https://fincraftly.com/desktop/updates
+  url: https://raclink.si/desktop/updates
   publishAutoUpdate: true

@@ -6,16 +6,16 @@
 // THE PROBLEM (security audit finding #4, 2026-09-06)
 //   electron-updater verifies the installer's SHA-512 against `latest.yml` — but
 //   `latest.yml` is served by the SAME host as the installer, and today that host
-//   is fincraftly.com, the live web app. So the integrity check answers "did I
-//   download what the update host said?", not "did FinCraftly publish this?".
-//   Anyone who can write to https://fincraftly.com/desktop/updates — a web-host
+//   is raclink.si, the live web app. So the integrity check answers "did I
+//   download what the update host said?", not "did RacLink publish this?".
+//   Anyone who can write to https://raclink.si/desktop/updates — a web-host
 //   compromise, a mis-scoped storage container behind that path, a stolen deploy
 //   credential — can publish a malicious latest.yml plus a matching installer,
 //   and every desktop client auto-downloads and auto-installs it on next quit.
 //   That is remote code execution on every customer machine.
 //
 //   Windows code signing is the standard second, independent check (the OS
-//   verifies the publisher regardless of where the bytes came from). FinCraftly
+//   verifies the publisher regardless of where the bytes came from). RacLink
 //   does not have a certificate yet — see SECURITY_RUNBOOK.md for procurement.
 //
 // WHAT THIS DOES IN THE MEANTIME
@@ -89,7 +89,7 @@ async function fetchText(url: string, maxBytes = 512 * 1024): Promise<string> {
  * Verify the update feed before electron-updater is allowed to act on it.
  *
  * @param feedBaseUrl The `publish.url` from electron-builder.yml, e.g.
- *                    https://fincraftly.com/desktop/updates
+ *                    https://raclink.si/desktop/updates
  */
 export async function verifyUpdateFeed(feedBaseUrl: string): Promise<IntegrityVerdict> {
   if (!updateSigningEnabled()) {

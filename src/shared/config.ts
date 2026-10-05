@@ -10,11 +10,11 @@
 // keep it free of Electron / DOM imports.
 // =============================================================================
 
-/** Production origin of the FinCraftly platform (overridable via env for dev). */
-export const DEFAULT_PLATFORM_ORIGIN = "https://fincraftly.com";
+/** Production origin of the RacLink platform (overridable via env for dev). */
+export const DEFAULT_PLATFORM_ORIGIN = "https://raclink.si";
 
 /** Version string reported to the platform through a request header. */
-export const DESKTOP_HEADER_NAME = "X-FinCraftly-Desktop";
+export const DESKTOP_HEADER_NAME = "X-RacLink-Desktop";
 
 /**
  * Dashboard route shape on the platform: `/dashboard/{clerkUserId}/{viewSlug}`.
@@ -41,22 +41,22 @@ export const DASHBOARD_ENTRY_PATH = `/platform/${HOME_VIEW}`;
 /**
  * Hosts that are part of signing in to the platform even though they are not
  * the platform's origin. Clerk (the platform's auth provider) serves its
- * frontend API from `clerk.fincraftly.com`; when a page load finds the
+ * frontend API from `clerk.raclink.si`; when a page load finds the
  * session cookie missing or stale, the platform's middleware redirects there
- * (the "handshake") and Clerk redirects straight back to fincraftly.com with
+ * (the "handshake") and Clerk redirects straight back to raclink.si with
  * a fresh session. That hop MUST stay inside the app: sending it to the
  * browser leaves the window blank and signs the browser in instead — which is
  * exactly the 1.1.3 "app is empty, the platform opened in Chrome" bug.
  */
 export const PLATFORM_AUTH_HOST_PATTERNS: readonly RegExp[] = [
-  /(^|\.)clerk\.fincraftly\.com$/i,
-  /(^|\.)accounts\.fincraftly\.com$/i,
+  /(^|\.)clerk\.raclink\.com$/i,
+  /(^|\.)accounts\.raclink\.com$/i,
   /(^|\.)clerk\.accounts\.dev$/i,
   /(^|\.)clerk\.com$/i,
 ];
 
 /**
- * Views a `fincraftly://<view>` deep link may open. Since the platform's own
+ * Views a `raclink://<view>` deep link may open. Since the platform's own
  * sidebar is shown in the app (v1.2), every dashboard view is reachable — the
  * shell no longer rewrites URLs to the AI Workspace; it only STARTS there.
  * The legacy `/invoicegenerator/{view}` route is still steered to the entry
@@ -93,7 +93,7 @@ export type ShellMenuEntry = ShellMenuItem | { separator: true };
 export const SHELL_MENU: readonly ShellMenuEntry[] = [
   { id: "open-in-browser", label: "Open in browser", icon: "external" },
   { id: "reload", label: "Reload", icon: "refresh" },
-  { id: "about", label: "About FinCraftly", icon: "info" },
+  { id: "about", label: "About RacLink", icon: "info" },
   { separator: true },
   { id: "sign-out", label: "Sign out", icon: "logout", danger: true },
 ];

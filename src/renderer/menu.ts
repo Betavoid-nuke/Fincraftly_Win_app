@@ -7,7 +7,7 @@
 // =============================================================================
 
 (() => {
-  const shell = window.fincraftlyShell;
+  const shell = window.raclinkShell;
   const icons = window.ShellIcons;
   const panel = document.getElementById("panel");
   if (!panel) throw new Error("menu: #panel missing");

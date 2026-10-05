@@ -4,7 +4,7 @@
 // The application window. One frameless BaseWindow, no titlebar of its own:
 //
 //   ┌────────────────────────────────────────────────────────── ⋯ ─ □ ✕ ┐
-//   │ platform view  (https://fincraftly.com/dashboard/…)              │
+//   │ platform view  (https://raclink.si/dashboard/…)              │
 //   │   — or —                                          ┌───────────┐  │
 //   │ welcome view   (local: "Sign in with your browser") │ menu view │  │
 //   │                                                   └───────────┘  │
@@ -19,7 +19,7 @@
 // Sign-in never happens inside this window. When the platform says "signed
 // out" (a redirect to /sign-in) the welcome view takes over, opens the
 // platform's /desktop/sign-in page in the person's browser, and waits for the
-// `fincraftly://auth?ticket=…&state=…` deep link. The ticket is a single-use
+// `raclink://auth?ticket=…&state=…` deep link. The ticket is a single-use
 // Clerk sign-in token that the app's own session consumes via
 // /sign-in?__clerk_ticket — after which the platform loads as usual.
 //
@@ -81,7 +81,7 @@ import {
   writeWindowState,
 } from "./windowState";
 
-const IS_DEV = process.env.FINCRAFTLY_DEV === "1";
+const IS_DEV = process.env.RACLINK_DEV === "1";
 /** Launched by Windows at log on to keep FinCodes company in the tray: no window until asked for. */
 const START_HIDDEN = process.argv.includes("--hidden");
 
@@ -150,7 +150,7 @@ export class ShellWindow {
       minWidth: WINDOW_MIN_SIZE.width,
       minHeight: WINDOW_MIN_SIZE.height,
       show: false,
-      title: "FinCraftly",
+      title: "RacLink",
       backgroundColor: tokens.background,
       icon: join(__dirname, "../renderer/assets/icon.png"),
       // Frameless with the OS-drawn caption controls: the Claude-desktop look.
@@ -184,7 +184,7 @@ export class ShellWindow {
 
     this.navigateTo(entryUrl());
 
-    if (process.env.FINCRAFTLY_SMOKE === "1" && !app.isPackaged) {
+    if (process.env.RACLINK_SMOKE === "1" && !app.isPackaged) {
       void import("./smoke").then(({ runSmoke }) => runSmoke({
         menuButton: this.menuButton,
         menu: this.menu,
@@ -208,7 +208,7 @@ export class ShellWindow {
       webPreferences: {
         session: getPlatformSession(),
         preload: join(__dirname, "../preload/platformPreload.js"),
-        additionalArguments: [`--fincraftly-version=${app.getVersion()}`],
+        additionalArguments: [`--raclink-version=${app.getVersion()}`],
         contextIsolation: true,
         sandbox: true,
         nodeIntegration: false,
@@ -372,7 +372,7 @@ export class ShellWindow {
 
     contents.on("page-title-updated", (_event, title) => {
       const clean = title.trim();
-      this.window.setTitle(clean ? `${clean} — FinCraftly` : "FinCraftly");
+      this.window.setTitle(clean ? `${clean} — RacLink` : "RacLink");
     });
 
     // Reshape the platform: sidebar → titlebar menu. Every document load.
@@ -404,7 +404,7 @@ export class ShellWindow {
     contents.on("focus", () => this.closeMenu("platform focused"));
 
     this.wireShortcuts(contents);
-    if (IS_DEV && process.env.FINCRAFTLY_DEVTOOLS === "1") contents.openDevTools({ mode: "detach" });
+    if (IS_DEV && process.env.RACLINK_DEVTOOLS === "1") contents.openDevTools({ mode: "detach" });
   }
 
   /**
@@ -421,7 +421,7 @@ export class ShellWindow {
     if (url.startsWith("file:") || url === "about:blank") return false;
     if (isExternalScheme(url) || !isPlatformUrl(url)) {
       // A hop in the platform's own sign-in (Clerk's session handshake, an
-      // auth provider that returns to fincraftly.com) stays in the app: it is
+      // auth provider that returns to raclink.si) stays in the app: it is
       // the app's session that needs the result. See PLATFORM_AUTH_HOST_PATTERNS.
       if (isPlatformAuthHop(url)) {
         log.info(`auth hop kept in-app (${source}):`, safeHost(url));
@@ -502,7 +502,7 @@ export class ShellWindow {
     log.info("browser sign-in started");
     shell.openExternal(url).catch((error) => {
       log.warn("openExternal sign-in", error);
-      this.showWelcome("error", "Could not open your browser. Open it yourself and go to fincraftly.com/desktop/sign-in.");
+      this.showWelcome("error", "Could not open your browser. Open it yourself and go to raclink.si/desktop/sign-in.");
     });
   }
 
@@ -512,13 +512,13 @@ export class ShellWindow {
     this.showWelcome("idle");
   }
 
-  /** `fincraftly://auth?ticket=…&state=…` — the browser handing the session over. */
+  /** `raclink://auth?ticket=…&state=…` — the browser handing the session over. */
   private completeBrowserSignIn(ticket: string, state: string): void {
     if (!ticket) {
       this.showWelcome("error", "The sign-in link was incomplete. Please try again.");
       return;
     }
-    // The browser page auto-launches the link AND has an "Open FinCraftly"
+    // The browser page auto-launches the link AND has an "Open RacLink"
     // button, and Chrome may add its own "open app?" prompt — the same ticket
     // can easily arrive two or three times. Only the first copy counts.
     if (ticket === this.lastTicket) {
@@ -693,9 +693,9 @@ export class ShellWindow {
   private showAbout(): void {
     void dialog.showMessageBox(this.window, {
       type: "info",
-      title: "About FinCraftly",
-      message: "FinCraftly for Windows",
-      detail: `Version ${app.getVersion()}\nConnected to ${platformOrigin()}\n\n© ${new Date().getFullYear()} FinCraftly. All rights reserved.`,
+      title: "About RacLink",
+      message: "RacLink for Windows",
+      detail: `Version ${app.getVersion()}\nConnected to ${platformOrigin()}\n\n© ${new Date().getFullYear()} RacLink. All rights reserved.`,
       buttons: ["OK"],
       noLink: true,
     });
@@ -717,7 +717,7 @@ export class ShellWindow {
 
   /**
    * Opens a platform view. Prefers the platform's own in-page navigation bus
-   * (`window.FinCraftlyUI.navigateToView`, no reload, instant); falls back to a
+   * (`window.RacLinkUI.navigateToView`, no reload, instant); falls back to a
    * full URL load when the page is not the dashboard (offline, …).
    */
   private openView(view: string): void {
@@ -733,7 +733,7 @@ export class ShellWindow {
 
     contents
       .executeJavaScript(
-        `(() => { const api = window.FinCraftlyUI; if (api && typeof api.navigateToView === "function") { api.navigateToView(${JSON.stringify(view)}); return true; } return false; })()`,
+        `(() => { const api = window.RacLinkUI; if (api && typeof api.navigateToView === "function") { api.navigateToView(${JSON.stringify(view)}); return true; } return false; })()`,
         true,
       )
       .then((handled: unknown) => { if (handled !== true) fallback(); })
@@ -800,9 +800,9 @@ export class ShellWindow {
   }
 
   /**
-   * Handles `fincraftly://…` deep links:
-   *   fincraftly://auth?ticket=…&state=…   → browser sign-in hand-off
-   *   fincraftly://<view>                   → open that platform view
+   * Handles `raclink://…` deep links:
+   *   raclink://auth?ticket=…&state=…   → browser sign-in hand-off
+   *   raclink://<view>                   → open that platform view
    */
   openDeepLink(target: string): void {
     log.info("deep link", target.replace(/ticket=[^&]+/, "ticket=…"));
